@@ -1,13 +1,18 @@
 {
   "name": "ajs_diploma",
   "version": "1.0.0",
-  "description": "###### tags: `netology` `advanced js`",
+  "description": "AJS_diploma",
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development",
-    "test": "jest --coverage",
+    "build": "webpack --mode development",
     "lint": "eslint .",
-    "build": "webpack --mode production"
+    "test": "jest",
+    "coverage": "jest --coverage",
+    "preshow:coverage": "npm run coverage",
+    "show:coverage": "live-server coverage/lcov-report",
+    "preshow:dist": "npm run build",
+    "show:dist": "live-server dist"
   },
   "repository": {
     "type": "git",
@@ -40,6 +45,7 @@
     "webpack-dev-server": "^3.2.1"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.2.5"
+    "@babel/polyfill": "^7.2.5",
+    "core-js": "^3.6.5"
   }
 }
