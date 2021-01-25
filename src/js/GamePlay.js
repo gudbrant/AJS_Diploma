@@ -1,4 +1,5 @@
 import { calcHealthLevel, calcTileType } from './utils';
+import {changePlayers, getBoard} from "../../../!!!!!!!homutovan ajs_diploma-master/src/js/utils";
 
 export default class GamePlay {
   constructor() {
@@ -12,6 +13,24 @@ export default class GamePlay {
     this.newGameListeners = [];
     this.saveGameListeners = [];
     this.loadGameListeners = [];
+  }
+
+  init(theme, boardSize, side) {
+    this.boardSize = boardSize;
+    this.board = getBoard(boardSize);
+    this.side = side;
+    this.boardEl = null;
+    this.cells = [];
+    this.cellClickListeners = [];
+    this.cellEnterListeners = [];
+    this.cellLeaveListeners = [];
+    this.newGameListeners = [];
+    this.saveGameListeners = [];
+    this.loadGameListeners = [];
+    this.demoGameListeners = [];
+    this.drawUi(theme);
+    this.modal = this.container.querySelector('.modal');
+    this.initForms();
   }
 
   bindToDOM(container) {
@@ -43,13 +62,35 @@ export default class GamePlay {
     this.newGameEl = this.container.querySelector('[data-id=action-restart]');
     this.saveGameEl = this.container.querySelector('[data-id=action-save]');
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
+    this.demoGameEl = this.container.querySelector('[data-id=action-demo]');
+    this.turnCounter = this.container.querySelector('.turn-counter');
+    this.gameStage = this.container.querySelector('.game-stage');
+    this.gameTimer = this.container.querySelector('.game-timer');
+    this.currentScore = this.container.querySelector('.score.current-score');
+    this.highScore = this.container.querySelector('.score.high-score');
+
+    this.drawSidebar(this.side, 'player');
+    this.drawSidebar(changePlayers[this.side], 'enemy');
+    this.newGameEl.addEventListener('click', (event) => this.onNewGameClick(event));
+    this.saveGameEl.addEventListener('click', (event) => this.onSaveGameClick(event));
+    this.loadGameEl.addEventListener('click', (event) => this.onLoadGameClick(event));
+    this.demoGameEl.addEventListener('click', (event) => this.onDemoGameClick(event));
+
+    this.boardEl = this.container.querySelector('[data-id=board]');
+    this.boardEl.style['grid-template-columns'] = `repeat(${this.boardSize}, 1fr)`;
+
+/*
+    this.newGameEl = this.container.querySelector('[data-id=action-restart]');
+    this.saveGameEl = this.container.querySelector('[data-id=action-save]');
+    this.loadGameEl = this.container.querySelector('[data-id=action-load]');
 
     this.newGameEl.addEventListener('click', event => this.onNewGameClick(event));
     this.saveGameEl.addEventListener('click', event => this.onSaveGameClick(event));
     this.loadGameEl.addEventListener('click', event => this.onLoadGameClick(event));
 
     this.boardEl = this.container.querySelector('[data-id=board]');
-
+    this.boardEl.style['grid-template-columns'] = `repeat(${this.boardSize}, 1fr)`;
+*/
     this.boardEl.classList.add(theme);
     for (let i = 0; i < this.boardSize ** 2; i += 1) {
       const cellEl = document.createElement('div');
@@ -59,6 +100,8 @@ export default class GamePlay {
       cellEl.addEventListener('click', event => this.onCellClick(event));
       this.boardEl.appendChild(cellEl);
     }
+
+
 
     this.cells = Array.from(this.boardEl.children);
   }
