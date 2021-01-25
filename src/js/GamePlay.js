@@ -27,6 +27,7 @@ export default class GamePlay {
    * @param theme
    */
   drawUi(theme) {
+    
     this.checkBinding();
 
     this.container.innerHTML = `
