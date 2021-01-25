@@ -32,6 +32,22 @@ body {
   margin: 50px 0;
 }
 
+.operation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info {
+  font-weight: 400;
+  color: red;
+  text-align: center;
+  vertical-align: middle;
+  padding: .375rem .75rem;
+  font-size: 2rem;
+  line-height: 1.5;
+}
+
 .board-container {
   display: flex;
   align-items: center;
@@ -41,7 +57,6 @@ body {
 
 .board {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
   grid-column-gap: 2px;
   grid-row-gap: 2px;
 }
@@ -49,6 +64,33 @@ body {
 .cell {
   position: relative;
 }
+
+.cell.entered {
+  opacity: 0.8;
+}
+
+.cell.highlighted {
+  opacity: 0.95;
+  outline: solid green 2px;
+
+  /* outline-offset: calc(var(--cell-size) / -2); */
+  /* border-width: 5px; */
+  /* border-color: blue; */
+}
+
+/* .cell.highlighted::after {
+  content: '';
+  display: block;
+  border-radius: 50%;
+  box-sizing: border-box;
+  width: 10%;
+  height: 10%;
+  top: 40%;
+  left: 40%;
+  opacity: 0.9;
+  position: absolute;
+  background-color: green;
+} */
 
 .cell.selected::before {
   content: '';
@@ -230,6 +272,22 @@ body {
   background: #f00;
 }
 
+.bullet {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  z-index: 999;
+}
+
+.bullet.red {
+  background-color: red;
+}
+
+.bullet.blue {
+  background-color: blue;
+}
+
 .damage {
   position: absolute;
   width: var(--cell-size);
@@ -251,4 +309,8 @@ body {
     top: -20px;
     font-size: 1.5rem;
   }
+}
+
+.modal {
+  display: none;
 }

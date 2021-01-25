@@ -1,8 +1,9 @@
-import { calcHealthLevel, calcTileType } from './utils';
+import { calcHealthLevel, calcTileType, getBoard } from './utils';
 
 export default class GamePlay {
-  constructor() {
-    this.boardSize = 8;
+  constructor(boardSize) {
+    this.boardSize = boardSize;
+    this.board = getBoard(boardSize);
     this.container = null;
     this.boardEl = null;
     this.cells = [];
@@ -27,37 +28,45 @@ export default class GamePlay {
    * @param theme
    */
   drawUi(theme) {
-    
     this.checkBinding();
 
     this.container.innerHTML = `
-      <div class="controls">
-        <button data-id="action-restart" class="btn">New Game</button>
-        <button data-id="action-save" class="btn">Save Game</button>
-        <button data-id="action-load" class="btn">Load Game</button>
+      <div class="operation" id="player">
+        <div class="info">evil</div>
+        <div class="controls">
+          <button data-id="action-restart" class="btn">New Game</button>
+          <button data-id="action-save" class="btn">Save Game</button>
+          <button data-id="action-load" class="btn">Load Game</button>
+          <button data-id="action-load" class="btn">Demo Game</button>
+        </div>
+        <div class="info">good</div>
       </div>
       <div class="board-container">
-        <div data-id="board" class="board"></div>
+        <div data-id="board" class="board"id="enemy"></div>
       </div>
     `;
 
     this.newGameEl = this.container.querySelector('[data-id=action-restart]');
     this.saveGameEl = this.container.querySelector('[data-id=action-save]');
     this.loadGameEl = this.container.querySelector('[data-id=action-load]');
+    // this.modal = document.querySelector('#modal-new-game');
+    this.playerNameEl = this.container.querySelector('#player');
+    this.enemyNameEl = this.container.querySelector('#enemy');
 
-    this.newGameEl.addEventListener('click', event => this.onNewGameClick(event));
-    this.saveGameEl.addEventListener('click', event => this.onSaveGameClick(event));
-    this.loadGameEl.addEventListener('click', event => this.onLoadGameClick(event));
+    this.newGameEl.addEventListener('click', (event) => this.onNewGameClick(event));
+    this.saveGameEl.addEventListener('click', (event) => this.onSaveGameClick(event));
+    this.loadGameEl.addEventListener('click', (event) => this.onLoadGameClick(event));
 
     this.boardEl = this.container.querySelector('[data-id=board]');
+    this.boardEl.style['grid-template-columns'] = `repeat(${this.boardSize}, 1fr)`;
 
     this.boardEl.classList.add(theme);
     for (let i = 0; i < this.boardSize ** 2; i += 1) {
       const cellEl = document.createElement('div');
-      cellEl.classList.add('cell', 'map-tile', `map-tile-${calcTileType(i, this.boardSize)}`);
-      cellEl.addEventListener('mouseenter', event => this.onCellEnter(event));
-      cellEl.addEventListener('mouseleave', event => this.onCellLeave(event));
-      cellEl.addEventListener('click', event => this.onCellClick(event));
+      cellEl.classList.add('cell', 'map-tile', `map-tile-${calcTileType(i, this.board)}`);
+      cellEl.addEventListener('mouseenter', (event) => this.onCellEnter(event));
+      cellEl.addEventListener('mouseleave', (event) => this.onCellLeave(event));
+      cellEl.addEventListener('click', (event) => this.onCellClick(event));
       this.boardEl.appendChild(cellEl);
     }
 
@@ -78,15 +87,13 @@ export default class GamePlay {
       const cellEl = this.boardEl.children[position.position];
       const charEl = document.createElement('div');
       charEl.classList.add('character', position.character.type);
-
       const healthEl = document.createElement('div');
       healthEl.classList.add('health-level');
-
       const healthIndicatorEl = document.createElement('div');
-      healthIndicatorEl.classList.add('health-level-indicator', `health-level-indicator-${calcHealthLevel(position.character.health)}`);
+      healthIndicatorEl.classList.add('health-level-indicator',
+        `health-level-indicator-${calcHealthLevel(position.character.health)}`);
       healthIndicatorEl.style.width = `${position.character.health}%`;
       healthEl.appendChild(healthIndicatorEl);
-
       charEl.appendChild(healthEl);
       cellEl.appendChild(charEl);
     }
@@ -125,7 +132,7 @@ export default class GamePlay {
    * @param callback
    */
   addNewGameListener(callback) {
-    this.newGameListeners.push(callback);
+    this.newGameListeners.push();
   }
 
   /**
@@ -149,36 +156,36 @@ export default class GamePlay {
   onCellEnter(event) {
     event.preventDefault();
     const index = this.cells.indexOf(event.currentTarget);
-    this.cellEnterListeners.forEach(o => o.call(null, index));
+    this.cellEnterListeners.forEach((o) => o.call(null, index));
   }
 
   onCellLeave(event) {
     event.preventDefault();
     const index = this.cells.indexOf(event.currentTarget);
-    this.cellLeaveListeners.forEach(o => o.call(null, index));
+    this.cellLeaveListeners.forEach((o) => o.call(null, index));
   }
 
   onCellClick(event) {
     const index = this.cells.indexOf(event.currentTarget);
-    this.cellClickListeners.forEach(o => o.call(null, index));
+    this.cellClickListeners.forEach((o) => o.call(null, index));
   }
 
   onNewGameClick(event) {
     event.preventDefault();
-    this.newGameListeners.forEach(o => o.call(null));
+    this.newGameListeners.forEach((o) => o.call(null));
   }
 
   onSaveGameClick(event) {
     event.preventDefault();
-    this.saveGameListeners.forEach(o => o.call(null));
+    this.saveGameListeners.forEach((o) => o.call(null));
   }
 
   onLoadGameClick(event) {
     event.preventDefault();
-    this.loadGameListeners.forEach(o => o.call(null));
+    this.loadGameListeners.forEach((o) => o.call(null));
   }
 
-  static showError(message) {
+  showError(message) {
     alert(message);
   }
 
@@ -194,7 +201,23 @@ export default class GamePlay {
   deselectCell(index) {
     const cell = this.cells[index];
     cell.classList.remove(...Array.from(cell.classList)
-      .filter(o => o.startsWith('selected')));
+      .filter((o) => o.startsWith('selected')));
+  }
+
+  enterCell(index) {
+    this.cells[index].classList.add('entered');
+  }
+
+  leaveCells(index) {
+    this.cells[index].classList.remove('entered');
+  }
+
+  highlightCell(cells) {
+    cells.forEach((i) => this.cells[i].classList.add('highlighted'));
+  }
+
+  dehighlightCell() {
+    this.cells.forEach((cell) => cell.classList.remove('highlighted'));
   }
 
   showCellTooltip(message, index) {
@@ -204,7 +227,7 @@ export default class GamePlay {
   hideCellTooltip(index) {
     this.cells[index].title = '';
   }
-  
+
   showDamage(index, damage) {
     return new Promise((resolve) => {
       const cell = this.cells[index];
@@ -220,6 +243,44 @@ export default class GamePlay {
     });
   }
 
+  showDistanceAttack(from, to, color) {
+    // console.log('showDistanceAttack');
+    // console.log(color);
+    return new Promise((resolve) => {
+      const cellFrom = this.cells[from];
+      const cellTo = this.cells[to];
+      const bulletEl = document.createElement('span');
+      // damageEl.textContent = damage;
+      bulletEl.classList.add('bullet', color);
+      cellFrom.appendChild(bulletEl);
+      const {
+        x: startX, y: startY, width: startW, height: startH,
+      } = cellFrom.getBoundingClientRect();
+      const {
+        x: stopX, y: stopY, // width: stopW, height: stopH,
+      } = cellTo.getBoundingClientRect();
+      const deltaX = (stopX - startX) / 50;
+      const deltaY = (stopY - startY) / 50;
+      this.moveElement(bulletEl, startH / 2, startW / 2, deltaX, deltaY, stopX - startX, stopY - startY);
+      // cellFrom.removeChild(bulletEl);
+      // resolve();
+    });
+  }
+
+  moveElement(element, posX, posY, deltaX, deltaY, stopX, stopY) {
+    // console.log('move');
+    // console.log(posX, posY, stopX);
+    // console.log(Math.abs(stopX - posX), deltaX);
+    if (Math.abs(stopX - posX) > Math.abs(deltaX) && Math.abs(stopY - posY) > Math.abs(deltaY)) {
+      element.style.top = `${posY}px`;
+      element.style.left = `${posX}px`;
+      setTimeout(
+        () => this.moveElement(element, posX + deltaX, posY + deltaY, deltaX, deltaY, stopX, stopY),
+        1,
+      );
+    }
+  }
+
   setCursor(cursor) {
     this.boardEl.style.cursor = cursor;
   }
@@ -229,4 +290,10 @@ export default class GamePlay {
       throw new Error('GamePlay not bind to DOM');
     }
   }
+
+  // showModal() {
+  //   console.log('asdfa');
+  //   this.modal.style.display = 'block';
+  //   console.log(this.modal);
+  // }
 }
